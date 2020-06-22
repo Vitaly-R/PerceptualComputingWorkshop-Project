@@ -7,6 +7,11 @@ class Base:
     __MAX_HP = 10
 
     def __init__(self, screen_width, screen_height):
+        """
+        Constructor.
+        :param screen_width: Width of the playing screen.
+        :param screen_height: Height of the playing screen.
+        """
         self.__image = pygame.image.load(os.path.join("Images", "Base.png")).convert_alpha()
         self.__shield_1 = pygame.image.load(os.path.join("Images", "Shield1.png")).convert_alpha()
         self.__shield_2 = pygame.image.load(os.path.join("Images", "Shield2.png")).convert_alpha()
@@ -27,6 +32,10 @@ class Base:
         self.__shield_offset = 7
 
     def draw(self, screen):
+        """
+        Draws the base to the given screen.
+        :param screen: The screen to draw to.
+        """
         screen.blit(self.__image, (self.__x, self.__y))
         if (int(0.8 * self.__MAX_HP)) < self.__hp:
             screen.blit(self.__shield_1, (self.__x, self.__y))
@@ -38,10 +47,20 @@ class Base:
             screen.blit(self.__shield_4, (self.__x, self.__y))
 
     def hit(self):
+        """
+        Registers a hit on the base.
+        """
         self.__hp -= 1
         self.__hp = max(self.__hp, 0)
 
     def check_collision(self, cx, cy, radius):
+        """
+        Checks for a collision with an object with a center (cx, cy) and a given radius.
+        :param cx: x coordinate of the center of the object to check.
+        :param cy: y coordinate of the center of the object to check.
+        :param radius: radius of the object to check.
+        :return: True if a collision occurs, False otherwise.
+        """
         if (int(0.2 * self.__MAX_HP)) < self.__hp:
             for section_x, section_y_lower, section_y_higher in self.__sections:
                 if self.__x <= cx <= section_x:

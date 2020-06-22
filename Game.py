@@ -12,6 +12,7 @@ import numpy as np
 
 class Game:
 
+    """ Game Constants. """
     __LASER_DELAY_FRAMES = 10
     __MISSILE_DELAY_FRAMES = 60
     __RELOAD_FRAMES = 300
@@ -27,6 +28,11 @@ class Game:
     __ENEMY_DIFFICULTY_INCREASE_STEP = 5
 
     def __init__(self, mode, hand=RIGHT):
+        """
+        Constructor.
+        :param mode: Mode value (KEYBOARD or WEBCAM from the parameters file).
+        :param hand: Hand value (LEFT or RIGHT from the parameters file).
+        """
         self.__mode = mode
         self.__hand = hand
         self.__gui = GUI()
@@ -36,6 +42,9 @@ class Game:
         self.__events = list()
 
     def __initialize_game_objects(self):
+        """
+        Initializes all flags, values, objects and data structures for the game.
+        """
         self.__base = Base(self.__gui.window_width, self.__gui.window_height)
         self.__ship = Ship(self.__gui.window_width // 2, 3 * self.__gui.window_height // 4, self.__gui.window_width, self.__gui.window_height)
         self.__asteroids = list()
@@ -67,6 +76,9 @@ class Game:
         self.__reset_difficulty()
 
     def __reset_difficulty(self):
+        """
+        Resets the difficulty level of the game.
+        """
         if self.__mode == KEYBOARD:
             self.__enemy_difficulty_level = 1
             self.__asteroid_difficulty_level = 1
@@ -75,6 +87,11 @@ class Game:
             self.__asteroid_difficulty_level = 1.5
 
     def play(self):
+        """
+        Runs a complete game.
+        (Since there is an option for restarting the game within the game loop itself,
+        after this method ends, this method cannot be called again)
+        """
         self.__sound_player.play_music()
         while self.__running:
             self.__events = pygame.event.get()
@@ -96,6 +113,7 @@ class Game:
         self.__gui.end()
 
     def __do_start_screen_loop(self):
+        """ Runs the loop of the start screen. """
         self.__gui.show_start_screen()
         for event in self.__events:
             if event.type == pygame.QUIT:
@@ -117,6 +135,7 @@ class Game:
                     self.__start_screen = False
 
     def __do_settings_loop(self):
+        """ Runs the loop of the settings screen. """
         self.__gui.show_settings(self.__mode, self.__hand)
         for event in self.__events:
             if event.type == pygame.QUIT:
@@ -135,6 +154,7 @@ class Game:
                     self.__player.set_hand(self.__hand)
 
     def __do_how_to_play_loop(self):
+        """ Runs the loop of the 'how to play' screen. """
         self.__gui.show_how_to_play_screen(self.__how_to_play_page)
         for event in self.__events:
             if event.type == pygame.QUIT:
@@ -153,6 +173,7 @@ class Game:
                     self.__how_to_play_page = max(self.__how_to_play_page, self.__HOW_TO_PLAY_START_PAGE)
 
     def __do_hand_tracking_initialization_loop(self):
+        """ Runs the loop of the hand tracking initialization screen. """
         self.__gui.screen.fill((0, 0, 0))
         gesture, dx, dy, _ = self.__player.get_action()
         if gesture == MOVE:
@@ -169,6 +190,7 @@ class Game:
                 self.__initialize_hand_tracking_screen = False
 
     def __do_game_loop(self):
+        """ Runs the main loop of the game. """
         self.__check_end_game()
         if self.__running and not self.__game_over:
             self.__check_pause()
@@ -185,6 +207,7 @@ class Game:
                                                 self.__MAX_SCORE, self.__TOTAL_NUM_OF_ENEMIES)
 
     def __check_end_game(self):
+        """ Checks weather any condition for the end of the game is met, and if so, updates the required parameters. """
         for event in self.__events:
             if event.type == pygame.QUIT:
                 self.__running = False
@@ -201,12 +224,14 @@ class Game:
             self.__game_won = True
 
     def __check_pause(self):
+        """ Checks weather the game needs to be paused / unpaused. """
         for event in self.__events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p:
                     self.__paused = not self.__paused
 
     def __check_mute(self):
+        """ Checks weather the game needs to be muted / unmuted. """
         for event in self.__events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_m:
@@ -216,11 +241,13 @@ class Game:
                         self.__sound_player.mute()
 
     def __check_collisions(self):
+        """ Checks all possible collisions in the game. """
         self.__check_asteroids_collisions()
         self.__check_enemy_collisions()
         self.__check_bomb_collisions()
 
     def __check_asteroids_collisions(self):
+        """ Checks collisions of asteroids with lasers, missiles, the ship, and the base. """
         for asteroid in self.__asteroids:
             if not asteroid.to_destroy:
                 self.__check_collisions_with_lasers(asteroid)
@@ -232,6 +259,7 @@ class Game:
                 self.__check_collisions_with_base(asteroid)
 
     def __check_enemy_collisions(self):
+        """ Checks collisions of enemies with lasers, missiles, and the ship. """
         for enemy in self.__enemies:
             if not enemy.to_destroy:
                 self.__check_collisions_with_lasers(enemy)
@@ -241,6 +269,7 @@ class Game:
                 self.__check_collisions_with_ship(enemy)
 
     def __check_bomb_collisions(self):
+        """ Checks collisions of bombs with lasers, missiles, the ship, and the base. """
         for bomb in self.__bombs:
             if not bomb.to_destroy:
                 self.__check_collisions_with_lasers(bomb)
@@ -252,18 +281,21 @@ class Game:
                 self.__check_collisions_with_base(bomb)
 
     def __check_collisions_with_lasers(self, other):
+        """ Checks collision of a given object with the lasers. """
         for laser in self.__lasers:
             if not laser.to_destroy:
                 if self.__check_collisions_between_flying_objects(other, laser):
                     self.__ship.get_score()
 
     def __check_collisions_with_missiles(self, other):
+        """ Checks collision of a given object with the flying missiles. """
         for missile in self.__missiles:
             if not missile.to_destroy:
                 if self.__check_collisions_between_flying_objects(other, missile):
                     self.__ship.get_score()
 
     def __check_collisions_between_flying_objects(self, obj1, obj2):
+        """ Checks collision between two flying objects. """
         distance = np.sqrt((obj1.cx - obj2.cx) ** 2 + (obj1.cy - obj2.cy) ** 2)
         collision_distance = obj1.radius + obj2.radius
         if distance < collision_distance:
@@ -274,6 +306,7 @@ class Game:
         return False
 
     def __check_collisions_with_ship(self, other):
+        """ Checks collision of a given object with the ship. """
         distance = np.sqrt((other.cx - self.__ship.cx) ** 2 + (other.cy - self.__ship.cy) ** 2)
         collision_distance = other.radius + self.__ship.radius
         if distance < collision_distance:
@@ -282,12 +315,14 @@ class Game:
             self.__sound_player.explode()
 
     def __check_collisions_with_base(self, other):
+        """ Checks collision of a given object with the base. """
         if self.__base.check_collision(other.cx, other.cy, other.radius):
             other.destroy()
             self.__base.hit()
             self.__sound_player.explode()
 
     def __update_asteroids(self):
+        """ Updates the asteroid objects in the game. Moves and destroys the existing ones as necessary, and if needed, generates more. """
         asteroids_to_destroy = list()
         for asteroid in self.__asteroids:
             if not asteroid.to_destroy:
@@ -303,6 +338,7 @@ class Game:
             self.__generate_asteroid_delay -= 1
 
     def __update_enemies(self):
+        """ Updates the enemy objects in the game. Moves and destroys the existing ones as necessary, and if needed, generates more. """
         if self.__eliminated_enemies == self.__next_increase:
             self.__enemy_difficulty_level += 0.3
             self.__next_increase += self.__ENEMY_DIFFICULTY_INCREASE_STEP
@@ -326,6 +362,8 @@ class Game:
             self.__generate_enemy_delay = max(self.__generate_enemy_delay, 0)
 
     def __update_ship(self):
+        """ Receives information as to which action to take with the ship from the player object. Then, applies the received action. If the game is in webcam mode,
+        then the lasers are shot automatically. If the game is in keyboard mode, the ship moves automatically (the player accelerates in the desired direction). """
         action, dx, dy, self.__hand_in_screen = self.__player.get_action()
         if action == ACCELERATE:
             self.__ship.accelerate(dx, dy)
@@ -351,12 +389,14 @@ class Game:
             self.__recovery_delay -= 1
 
     def __shoot_laser(self):
+        """ Asks the ship to shoot a laser, if possible. """
         if not self.__laser_delay:
             self.__lasers.append(self.__ship.shoot_laser())
             self.__laser_delay = self.__LASER_DELAY_FRAMES
             self.__sound_player.shoot_laser()
 
     def __update_lasers(self):
+        """ Updates the laser objects in the game. Moves and destroys them as necessary, and charges the ships laser cannon. """
         lasers_to_erase = list()
         for laser in self.__lasers:
             if not laser.to_destroy:
@@ -369,6 +409,7 @@ class Game:
             self.__laser_delay -= 1
 
     def __update_missiles(self):
+        """ Updates the flying missile objects in the game. Moves and destroys them as necessary, and charges the ships missiles. """
         missiles_to_erase = list()
         for missile in self.__missiles:
             if not missile.to_destroy:
@@ -390,6 +431,7 @@ class Game:
             self.__missile_reload_delay = self.__RELOAD_FRAMES
 
     def __update_bombs(self):
+        """ Updates the falling bomb objects in the game. Moves and destroys them as necessary. """
         bombs_to_destroy = list()
         for bomb in self.__bombs:
             if not bomb.to_destroy:
@@ -400,6 +442,7 @@ class Game:
             self.__bombs.remove(bomb)
 
     def __do_game_over_loop(self):
+        """ Runs the 'game over' loop of the game. """
         self.__gui.show_game_over_screen()
         for event in self.__events:
             if event.type == pygame.QUIT:
@@ -413,6 +456,7 @@ class Game:
                     self.__initialize_game_objects()
 
     def __do_win_loop(self):
+        """ Runs the victory loop of the game. """
         self.__gui.show_win_screen()
         for event in self.__events:
             if event.type == pygame.QUIT:
@@ -424,17 +468,24 @@ class Game:
                     self.__initialize_game_objects()
 
     def __restart(self):
+        """ Restarts the game. """
         self.__initialize_game_objects()
         self.__player.start()
         self.__start_screen = False
         self.__playing = True
 
     def __pay_respects(self):
+        """ Shows the selected meme for a certain amount of time. """
         self.__gui.show_respects_screen()
         pygame.time.wait(self.__RESPECT_TIME)
 
 
 def init(mode=KEYBOARD):
+    """
+    Initializes a new game object.
+    :param mode: Playing mode value (KEYBOARD or WEBCAM from parameters file)
+    :return: If the given mode is legal, a new Game object, None otherwise.
+    """
     if mode in [KEYBOARD, WEBCAM]:
         return Game(mode)
     return None

@@ -1,3 +1,7 @@
+"""
+Runs the Base Defender game.
+"""
+
 from Game import init
 
 if __name__ == '__main__':

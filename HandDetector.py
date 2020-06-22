@@ -2,6 +2,9 @@ from Parameters import RIGHT, LEFT
 import os
 import sys
 try:
+    """
+    Attempting to import openpose.
+    """
     cwd = os.getcwd()
     openpose_python_dir = os.path.join(cwd, "openpose", "python", "openpose", "Release")
     openpose_bin_dir = os.path.join(cwd, "openpose", "bin")
@@ -16,6 +19,11 @@ except ImportError as e:
 class HandDetector:
 
     def __init__(self, webcamObject, hand=RIGHT):
+        """
+        Constructor.
+        :param webcamObject: Webcam reader from which the images come from.
+        :param hand: Which hand to detect.
+        """
         self.__online = op is not None
         if self.__online:
             self.__hand = RIGHT if hand else LEFT
@@ -39,12 +47,21 @@ class HandDetector:
                                                 op.Rectangle(0, 0, 0, 0)]]
 
     def detect(self, image):
+        """
+        Detects the keypoints of the selected hand in the given image.
+        :param image: The image in which to detect.
+        :return: The hand keypoints, each point of the form (x, y, confidence).
+        """
         if self.__online:
             self.__datum.cvInputData = image
             self.__opWrapper.emplaceAndPop([self.__datum])
             return self.__datum.handKeypoints[self.__hand][0]
 
     def set_hand(self, hand):
+        """
+        Sets which hand to detect.
+        :param hand: Which hand to detect (from LEFT, RIGHT from the parameters file).
+        """
         if self.__online:
             self.__hand = RIGHT if hand else LEFT
             if self.__hand:

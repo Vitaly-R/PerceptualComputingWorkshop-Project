@@ -4,10 +4,16 @@ from Parameters import RIGHT, LEFT
 
 class GestureEngine:
 
+    """
+    Gesture values.
+    """
     NO_GESTURE = 0
     OPEN_HAND = 1
     METAL = 2
 
+    """
+    Keypoint indices.
+    """
     __WRIST = 0
     __PALM = [1, 5, 9, 13, 17]
     __THUMB = [1, 2, 3, 4]
@@ -17,10 +23,16 @@ class GestureEngine:
     __PINKIE = [17, 18, 19, 20]
     __FINGERS = [__THUMB, __INDEX, __MIDDLE, __RING, __PINKIE]
     __KEYPOINTS = 21
-    __METAL_GESTURE = [False, True, False, False, True]
-    THRESHOLD = 0.3
+
+    __METAL_GESTURE = [False, True, False, False, True]  # gesture finger values.
+
+    THRESHOLD = 0.3  # confidence threshold
 
     def __init__(self, hand=RIGHT):
+        """
+        Constructor.
+        :param hand: Which hand is analyzed.
+        """
         self.__gesture_memory = None
         self.__x_s = np.zeros((self.__KEYPOINTS, ))
         self.__y_s = np.zeros((self.__KEYPOINTS, ))
@@ -29,7 +41,15 @@ class GestureEngine:
         self.__hand = RIGHT if hand == RIGHT else LEFT
         self.__open_fingers = {finger[0]: False for finger in self.__FINGERS}
 
+    def set_hand(self, hand):
+        self.__hand = RIGHT if hand == RIGHT else LEFT
+
     def analyze(self, handKeypoints):
+        """
+        Analyzes the given keypoints.
+        :param handKeypoints: Keypoints to analyze.
+        :return: A tuple of the form (gesture, dx, dy, cx, cy), where dx/dy are the distances between the current center of the hand (cx, cy), and the previous.
+        """
         self.__x_s = handKeypoints[:, 0]
         self.__y_s = handKeypoints[:, 1]
         self.__c_s = handKeypoints[:, 2]
@@ -44,6 +64,9 @@ class GestureEngine:
         return gesture_tuple
 
     def __determine_gesture(self):
+        """
+        :return: Which gesture the current keypoints represent.
+        """
         self.__check_open_fingers()
         open_fingers = list(self.__open_fingers.values())
         if False not in open_fingers:
@@ -53,6 +76,9 @@ class GestureEngine:
         return self.NO_GESTURE
 
     def __check_open_fingers(self):
+        """
+        Determines which fingers are open based on the kyepoints.
+        """
         if self.__hand == LEFT:
             self.__open_fingers[self.__THUMB[0]] = (self.__x_s[self.__THUMB[-1]] < self.__x_s[self.__THUMB[0]])
         else:
@@ -61,6 +87,9 @@ class GestureEngine:
             self.__open_fingers[finger[0]] = (50 <= (self.__y_s[finger[0]] - self.__y_s[finger[-1]]))
 
     def __calculate_center(self):
+        """
+        :return: The center of mass of the hand.
+        """
         cx = 0
         cy = 0
         for finger in self.__FINGERS:
@@ -71,6 +100,11 @@ class GestureEngine:
         return int(cx), int(cy)
 
     def __calculate_diff(self, cx, cy):
+        """
+        :param cx: x coordinate of the current center of mass of the hand keypoints.
+        :param cy: y coordinate of the current center of mass of the hand keypoints.
+        :return: The distance between the current and the previous centers of mass, reversed along the x axis.
+        """
         dx = 0
         dy = 0
         if self.__gesture_memory is not None:

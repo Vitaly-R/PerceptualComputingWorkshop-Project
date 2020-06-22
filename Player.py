@@ -17,18 +17,33 @@ PLAYERS = list()
 class Player(ABC):
 
     def start(self):
+        """
+        Initialization method for any players that require some initialization before the start of a game.
+        """
         pass
 
     def set_hand(self, hand):
+        """
+        Sets which hand the player uses, if any.
+        :param hand: Value for the hand (one of RIGHT, LEFT from the parameters file).
+        """
         pass
 
     @abstractmethod
     def get_action(self):
+        """
+        :return: The action for the round from the player.
+        """
         pass
 
 
 class WebcamPlayer(Player):
     def __init__(self, hand):
+        """
+        Constructor.
+        Initializes webcam and hand detection objects for playing.
+        :param hand: Which hand to play with (RIGHT or LEFT from parameters file)
+        """
         self.__capture = WebcamThread()
         self.__hand_detector = HandDetector(self.__capture, hand)
         self.__gesture_engine = GestureEngine(hand)
@@ -41,6 +56,7 @@ class WebcamPlayer(Player):
 
     def set_hand(self, hand):
         self.__hand_detector.set_hand(hand)
+        self.__gesture_engine.set_hand(hand)
 
     def get_action(self):
         frame = self.__capture.grab_frame()
@@ -72,11 +88,21 @@ class KeyboardPlayer(Player):
 
 
 def init(hand):
+    """
+    Initializes the players available for the game.
+    :param hand:
+    :return:
+    """
     global PLAYERS
     PLAYERS = [KeyboardPlayer(), WebcamPlayer(hand)]
 
 
 def get_player(mode, hand=RIGHT):
+    """
+    :param mode: Playing mode (KEYBOARD or WEBCAM from parameters file)
+    :param hand: Hand to play with (RIGHT or LEFT from parameters file)
+    :return: A player for the requested mode, with the requested hand.
+    """
     global PLAYERS
     if not len(PLAYERS):
         init(hand)

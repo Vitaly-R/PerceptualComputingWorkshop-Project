@@ -1,0 +1,4 @@
+KEYBOARD = 0
+WEBCAM = 1
+RIGHT = True
+LEFT = False

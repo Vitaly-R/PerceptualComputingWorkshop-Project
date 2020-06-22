@@ -1,1 +1,1 @@
-# PerceptualComputingWorkshop-Project
+# Perceptual Computing Workshop - Final Project

@@ -1,0 +1,5 @@
+The background music and sound effects are downloaded from freesound.org:
+1. StartScreenBackground.wav - Space Arp F Chords.wav (uploaded by esistnichtsoernst)
+2. Laser.wav - Retro_Laser_Shot_03.wav (uploaded by MATRIXXX_)
+3. Missile.wav - missile_explosion.wav (uploaded by smcameron)
+4. Explosion.wav - 8-bit Explosion1.wav (uploaded by timgormly)

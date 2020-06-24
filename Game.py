@@ -472,7 +472,10 @@ class Game:
         self.__initialize_game_objects()
         self.__player.start()
         self.__start_screen = False
-        self.__playing = True
+        if self.__mode == KEYBOARD:
+            self.__playing = True
+        else:
+            self.__initialize_hand_tracking_screen = True
 
     def __pay_respects(self):
         """ Shows the selected meme for a certain amount of time. """

@@ -26,7 +26,7 @@ class GestureEngine:
 
     __METAL_GESTURE = [False, True, False, False, True]  # gesture finger values.
 
-    THRESHOLD = 0.3  # confidence threshold
+    THRESHOLD = 0.4  # confidence threshold
 
     def __init__(self, hand=RIGHT):
         """
